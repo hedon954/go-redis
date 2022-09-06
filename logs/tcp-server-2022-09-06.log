@@ -1,0 +1,6 @@
+[INFO][server.go:27] 2022/09/06 22:22:27 start to listen 0.0.0.0:6379
+[INFO][server.go:63] 2022/09/06 22:22:38 accepted connection 127.0.0.1:61654
+[INFO][server.go:63] 2022/09/06 22:22:46 accepted connection 127.0.0.1:61684
+[INFO][server.go:43] 2022/09/06 22:22:59 shutting down
+[INFO][echo.go:78] 2022/09/06 22:22:59 handler shutting down
+[INFO][echo.go:78] 2022/09/06 22:22:59 handler shutting down
