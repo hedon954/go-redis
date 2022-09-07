@@ -3,6 +3,8 @@ package reply
 import (
 	"bytes"
 	"fmt"
+	"go-redis/interface/resp"
+	"strconv"
 )
 
 var (
@@ -65,7 +67,7 @@ type StatusReply struct {
 	Status string
 }
 
-func (s StatusReply) ToBytes() []byte {
+func (s *StatusReply) ToBytes() []byte {
 	return []byte("+" + s.Status + CRLF)
 }
 
@@ -75,12 +77,51 @@ func MakeStatusReply(status string) *StatusReply {
 	}
 }
 
+// IntReply replies an int64 number
+type IntReply struct {
+	Code int64
+}
+
+func (i *IntReply) ToBytes() []byte {
+	return []byte(":" + strconv.FormatInt(i.Code, 10) + CRLF)
+}
+
+func MakeIntReply(code int64) *IntReply {
+	return &IntReply{
+		Code: code,
+	}
+}
+
 // ErrorReply defines error reply
 type ErrorReply interface {
 	Error() string
 	ToBytes() []byte
 }
 
+// StandardErrReply defines an err reply can be customized
+type StandardErrReply struct {
+	Status string
+}
+
+func (s *StandardErrReply) Error() string {
+	return s.Status
+}
+
+func (s *StandardErrReply) ToBytes() []byte {
+	return []byte("-" + s.Status + CRLF)
+}
+
+func MakeStandardErrReply(status string) *StandardErrReply {
+	return &StandardErrReply{
+		Status: status,
+	}
+}
+
 func buildStringReply(bs []byte) string {
 	return fmt.Sprintf("$%d%s%s%s", len(bs), CRLF, bs, CRLF)
+}
+
+// IsErrReply checks the reply is error reply or not
+func IsErrReply(reply resp.Reply) bool {
+	return reply.ToBytes()[0] == '-'
 }
