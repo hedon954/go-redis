@@ -1,6 +1,7 @@
 package reply
 
 import (
+	"bytes"
 	"fmt"
 )
 
@@ -19,7 +20,7 @@ func (b *BulkReply) ToBytes() []byte {
 		return nullBulkReplyBytes
 	}
 	// hedon -> $5\r\nhedon\r\n
-	return []byte(fmt.Sprintf("$%d%s%s%s", len(b.Arg), CRLF, b.Arg, CRLF))
+	return []byte(buildStringReply(b.Arg))
 }
 
 func MakeBulkReply(arg []byte) *BulkReply {
@@ -28,8 +29,43 @@ func MakeBulkReply(arg []byte) *BulkReply {
 	}
 }
 
+// MultiBulkReply represents multi messages redis replies to client
+type MultiBulkReply struct {
+	Args [][]byte
+}
+
+func (m *MultiBulkReply) ToBytes() []byte {
+	argLen := len(m.Args)
+	if argLen == 0 {
+		return nullBulkReplyBytes
+	}
+	// SET key value
+	// ->
+	// *3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("*%d%s", argLen, CRLF))
+	for i := 0; i < argLen; i++ { //$3\r\nSET\r\n
+		if len(m.Args[i]) == 0 {
+			buf.WriteString(string(nullBulkReplyBytes) + CRLF)
+		} else {
+			buf.WriteString(buildStringReply(m.Args[i]))
+		}
+	}
+	return buf.Bytes()
+}
+
+func MakeMultiBulkReply(args [][]byte) *MultiBulkReply {
+	return &MultiBulkReply{
+		Args: args,
+	}
+}
+
 // ErrorReply defines error reply
 type ErrorReply interface {
 	Error() string
 	ToBytes() []byte
+}
+
+func buildStringReply(bs []byte) string {
+	return fmt.Sprintf("$%d%s%s%s", len(bs), CRLF, bs, CRLF)
 }
