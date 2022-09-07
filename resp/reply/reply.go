@@ -60,6 +60,21 @@ func MakeMultiBulkReply(args [][]byte) *MultiBulkReply {
 	}
 }
 
+// StatusReply replies a status
+type StatusReply struct {
+	Status string
+}
+
+func (s StatusReply) ToBytes() []byte {
+	return []byte("+" + s.Status + CRLF)
+}
+
+func MakeStatusReply(status string) *StatusReply {
+	return &StatusReply{
+		Status: status,
+	}
+}
+
 // ErrorReply defines error reply
 type ErrorReply interface {
 	Error() string
