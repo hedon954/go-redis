@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+
 	"go-redis/config"
 	"go-redis/lib/file"
 	"go-redis/lib/logger"
+	"go-redis/resp/handler"
 	"go-redis/tcp"
 )
 
@@ -24,7 +26,7 @@ func main() {
 
 	err := tcp.ListenAndServeWithSignal(
 		&tcp.Config{Address: fmt.Sprintf("%s:%d", config.Properties.Bind, config.Properties.Port)},
-		tcp.MakeHandler())
+		handler.MakeRespHandler())
 
 	if err != nil {
 		logger.Fatal(err)
