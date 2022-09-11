@@ -6,6 +6,14 @@ import (
 	"go-redis/resp/reply"
 )
 
+func init() {
+	RegisterCommand("get", execGet, 2)
+	RegisterCommand("set", execSet, 3)
+	RegisterCommand("setnx", execSetNX, 3)
+	RegisterCommand("getset", execGetSet, 3)
+	RegisterCommand("strlen", execStrLen, 2)
+}
+
 // execGet GET k1
 func execGet(db *DB, args [][]byte) resp.Reply {
 	key := string(args[0])

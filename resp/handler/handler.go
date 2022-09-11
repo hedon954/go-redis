@@ -2,12 +2,13 @@ package handler
 
 import (
 	"context"
-	"go-redis/database"
+	"fmt"
 	"io"
 	"net"
 	"strings"
 	"sync"
 
+	"go-redis/database"
 	"go-redis/lib/logger"
 	"go-redis/lib/sync/atomic"
 	"go-redis/resp/connection"
@@ -26,7 +27,7 @@ type RespHandler struct {
 
 func MakeRespHandler() *RespHandler {
 	return &RespHandler{
-		db: database.MakeEchoDatabase(),
+		db: database.NewDatabase(),
 	}
 }
 
@@ -62,7 +63,7 @@ func (r *RespHandler) Handle(ctx context.Context, conn net.Conn) {
 				payload.Err == io.ErrUnexpectedEOF ||
 				strings.Contains(payload.Err.Error(), "use of closed network connection") {
 				r.closeClient(client)
-				logger.Info("connection closed: %v", client.RemoteAddr())
+				logger.Info(fmt.Sprintf("connection closed: %v", client.RemoteAddr()))
 				return
 			}
 
