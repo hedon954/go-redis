@@ -1,8 +1,6 @@
 package aof
 
 import (
-	"go-redis/resp/connection"
-	"go-redis/resp/parser"
 	"io"
 	"os"
 	"strconv"
@@ -10,6 +8,8 @@ import (
 	"go-redis/config"
 	"go-redis/lib/logger"
 	"go-redis/lib/utils"
+	"go-redis/resp/connection"
+	"go-redis/resp/parser"
 	"go-redis/resp/reply"
 
 	databaseface "go-redis/interface/database"
