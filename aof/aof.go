@@ -1,6 +1,9 @@
 package aof
 
 import (
+	"go-redis/resp/connection"
+	"go-redis/resp/parser"
+	"io"
 	"os"
 	"strconv"
 
@@ -89,5 +92,34 @@ func (handler *Handler) handleAof() {
 
 // loadAof replays aof file when redis starts
 func (handler *Handler) loadAof() {
-
+	file, err := os.Open(handler.aofFilename)
+	if err != nil {
+		logger.Warn(err)
+		return
+	}
+	defer file.Close()
+	ch := parser.ParseStream(file)
+	fakeConn := &connection.Connection{} // only used for save dbIndex
+	for p := range ch {
+		if p.Err != nil {
+			if p.Err == io.EOF {
+				break
+			}
+			logger.Error("parse error: " + p.Err.Error())
+			continue
+		}
+		if p.Data == nil {
+			logger.Error("empty payload")
+			continue
+		}
+		r, ok := p.Data.(*reply.MultiBulkReply)
+		if !ok {
+			logger.Error("require multi bulk reply")
+			continue
+		}
+		ret := handler.db.Exec(fakeConn, r.Args)
+		if reply.IsErrReply(ret) {
+			logger.Error("exec err", err)
+		}
+	}
 }
