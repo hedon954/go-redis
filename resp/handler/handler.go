@@ -56,6 +56,8 @@ func (r *RespHandler) Handle(ctx context.Context, conn net.Conn) {
 	// listen to the channel to get handle result
 	for payload := range ch {
 
+		fmt.Printf("got: %v\n", payload)
+
 		// error
 		if payload.Err != nil {
 
