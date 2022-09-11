@@ -11,14 +11,16 @@ import (
 
 // DB represent a redis database
 type DB struct {
-	index int
-	data  dict.Dict
+	index  int
+	data   dict.Dict
+	addAof func(CmdLine)
 }
 
 // makeDB creates the first redis database
 func makeDB() *DB {
 	db := &DB{
-		data: dict.MakeSyncDict(),
+		data:   dict.MakeSyncDict(),
+		addAof: func(line CmdLine) {}, // avoid writing aof again while loadAof
 	}
 	return db
 }

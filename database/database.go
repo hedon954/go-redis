@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"go-redis/aof"
 	"go-redis/config"
 	"go-redis/interface/resp"
 	"go-redis/lib/logger"
@@ -12,11 +13,13 @@ import (
 
 // Database represent a redis
 type Database struct {
-	dbSet []*DB
+	dbSet      []*DB
+	aofHandler *aof.Handler
 }
 
 // NewDatabase initials a redis
 func NewDatabase() *Database {
+	// create dbs
 	database := &Database{}
 	if config.Properties.Databases == 0 {
 		config.Properties.Databases = 16
@@ -27,6 +30,21 @@ func NewDatabase() *Database {
 		db := makeDB()
 		db.index = i
 		database.dbSet[i] = db
+	}
+
+	// initial aof
+	if config.Properties.AppendOnly {
+		aofHandler, err := aof.NewAofHandler(database)
+		if err != nil {
+			panic(err)
+		}
+		database.aofHandler = aofHandler
+		for _, db := range database.dbSet {
+			db.addAof = func(line CmdLine) {
+				database.aofHandler.AddAof(db.index, aof.CmdLine(line))
+			}
+		}
+
 	}
 	return database
 }
