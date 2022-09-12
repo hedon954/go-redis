@@ -50,5 +50,4 @@ func SetupConfig(filename, dir string) {
 	if err != nil {
 		logger.Fatal(err)
 	}
-
 }

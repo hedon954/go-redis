@@ -3,15 +3,16 @@
 package client
 
 import (
+	"net"
+	"runtime/debug"
+	"sync"
+	"time"
+
 	"go-redis/interface/resp"
 	"go-redis/lib/logger"
 	"go-redis/lib/sync/wait"
 	"go-redis/resp/parser"
 	"go-redis/resp/reply"
-	"net"
-	"runtime/debug"
-	"sync"
-	"time"
 )
 
 // Client is a pipeline mode redis client
@@ -146,6 +147,8 @@ func (client *Client) Send(args [][]byte) resp.Reply {
 	}
 	req.waiting.Add(1)
 	client.working.Add(1)
+	defer client.working.Done()
+
 	client.pendingReqs <- req
 	timeout := req.waiting.WaitWithTimeout(maxWait)
 	if timeout {

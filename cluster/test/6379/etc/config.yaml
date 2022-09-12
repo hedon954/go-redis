@@ -3,6 +3,6 @@ port: 6379
 appendOnly: yes
 appendFilename: appendonly.aof
 
-self: 127.0.0.1:6379
+self: 0.0.0.0:6379
 peers:
-  - 127.0.0.1:6380
+  - 0.0.0.0:6380

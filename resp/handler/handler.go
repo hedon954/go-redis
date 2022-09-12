@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"fmt"
+	"go-redis/cluster"
+	"go-redis/config"
 	"io"
 	"net"
 	"strings"
@@ -26,9 +28,15 @@ type RespHandler struct {
 }
 
 func MakeRespHandler() *RespHandler {
-	return &RespHandler{
-		db: database.NewStandaloneDatabase(),
+	rh := &RespHandler{}
+
+	if config.Properties.Self != "" && len(config.Properties.Peers) > 0 {
+		rh.db = cluster.MakeClusterDatabase()
+	} else {
+		rh.db = database.NewStandaloneDatabase()
 	}
+
+	return rh
 }
 
 // closeClient closes specified client connection
@@ -56,7 +64,11 @@ func (r *RespHandler) Handle(ctx context.Context, conn net.Conn) {
 	// listen to the channel to get handle result
 	for payload := range ch {
 
-		fmt.Printf("got: %v\n", payload)
+		//if payload.Data != nil {
+		//	fmt.Printf("got: %s\n", payload.Data.ToBytes())
+		//} else {
+		//	fmt.Printf("data nil: %s\n", payload.Err.Error())
+		//}
 
 		// error
 		if payload.Err != nil {
@@ -65,7 +77,7 @@ func (r *RespHandler) Handle(ctx context.Context, conn net.Conn) {
 				payload.Err == io.ErrUnexpectedEOF ||
 				strings.Contains(payload.Err.Error(), "use of closed network connection") {
 				r.closeClient(client)
-				logger.Info(fmt.Sprintf("connection closed: %v", client.RemoteAddr()))
+				logger.Info(fmt.Sprintf("connection closed: %s", client.RemoteAddr()))
 				return
 			}
 
