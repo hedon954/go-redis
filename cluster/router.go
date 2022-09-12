@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"go-redis/interface/resp"
-	"go-redis/lib/logger"
 )
 
 // CmdFunc represents a command executor
@@ -42,7 +41,6 @@ func defaultFunc(cdb *Database, c resp.Connection, cmdArgs [][]byte) resp.Reply 
 	// select node
 	key := string(cmdArgs[1])
 	node := cdb.peerPicker.PickNode(key)
-	logger.Info(cdb.self, "pick node:", node)
 
 	// relay
 	return cdb.relay(node, c, cmdArgs)
