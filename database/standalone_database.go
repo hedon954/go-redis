@@ -11,16 +11,16 @@ import (
 	"go-redis/resp/reply"
 )
 
-// Database represent a redis
-type Database struct {
+// StandaloneDatabase represent a redis
+type StandaloneDatabase struct {
 	dbSet      []*DB
 	aofHandler *aof.Handler
 }
 
-// NewDatabase initials a redis
-func NewDatabase() *Database {
+// NewStandaloneDatabase initials a redis
+func NewStandaloneDatabase() *StandaloneDatabase {
 	// create dbs
-	database := &Database{}
+	database := &StandaloneDatabase{}
 	if config.Properties.Databases == 0 {
 		config.Properties.Databases = 16
 	}
@@ -51,7 +51,7 @@ func NewDatabase() *Database {
 }
 
 // Exec executes command sent by client
-func (database *Database) Exec(client resp.Connection, args [][]byte) resp.Reply {
+func (database *StandaloneDatabase) Exec(client resp.Connection, args [][]byte) resp.Reply {
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Error(err)
@@ -71,19 +71,19 @@ func (database *Database) Exec(client resp.Connection, args [][]byte) resp.Reply
 	return db.Exec(client, args)
 }
 
-func (database *Database) Close() error {
+func (database *StandaloneDatabase) Close() error {
 	logger.Info("database shutting down")
 	return nil
 }
 
-func (database *Database) AfterClientClose(client resp.Connection) error {
+func (database *StandaloneDatabase) AfterClientClose(client resp.Connection) error {
 	logger.Info("client shutting down")
 	return nil
 }
 
 // execSelect selects a db
 // e.g. select 1
-func execSelect(c resp.Connection, database *Database, args [][]byte) resp.Reply {
+func execSelect(c resp.Connection, database *StandaloneDatabase, args [][]byte) resp.Reply {
 	index := string(args[0])
 	i, err := strconv.Atoi(index)
 	if err != nil {
